@@ -27,9 +27,9 @@ import (
 func RadialRange(params RadialRangeParams) []fdb.KeyRange {
 	return params.
 		setDefaults().
-		ranges().
-		combine().
-		keyRanges(params.Subspace)
+		findNeighboringRanges().
+		combineRanges().
+		createKeyRanges(params.Subspace)
 }
 
 // RadialRangeParams defaults to expecting 64-bit geohash-encoded keys.
@@ -62,6 +62,22 @@ func (params RadialRangeParams) radiusToBits() uint {
 	}
 
 	return uint(initialSignificantBits)
+}
+
+func (params RadialRangeParams) findNeighboringRanges() hashRanges {
+	rangeBits := params.radiusToBits()
+
+	queryPoint := geohash.EncodeIntWithPrecision(
+		params.Latitude,
+		params.Longitude,
+		rangeBits,
+	)
+
+	neighborList := neighbors(geohash.NeighborsIntWithPrecision(queryPoint, rangeBits))
+	neighborList = append(neighborList, queryPoint)
+
+	diff := params.BitsOfPrecision - rangeBits
+	return neighborList.expandRanges(diff)
 }
 
 const (
@@ -100,23 +116,7 @@ func (s hashRangesMinAscSorter) Less(i, j int) bool {
 
 type neighbors []uint64
 
-func (params RadialRangeParams) ranges() hashRanges {
-	rangeBits := params.radiusToBits()
-
-	queryPoint := geohash.EncodeIntWithPrecision(
-		params.Latitude,
-		params.Longitude,
-		rangeBits,
-	)
-
-	neighborList := neighbors(geohash.NeighborsIntWithPrecision(queryPoint, rangeBits))
-	neighborList = append(neighborList, queryPoint)
-
-	diff := params.BitsOfPrecision - rangeBits
-	return neighborList.ranges(diff)
-}
-
-func (neighborList neighbors) ranges(rangeBitsDiff uint) hashRanges {
+func (neighborList neighbors) expandRanges(rangeBitsDiff uint) hashRanges {
 	hashRangeList := make(hashRanges, 0, len(neighborList))
 
 	for _, neighbor := range neighborList {
@@ -140,7 +140,7 @@ func (neighborList neighbors) ranges(rangeBitsDiff uint) hashRanges {
 
 type hashRanges []hashRange
 
-func (hashRangeList hashRanges) combine() hashRanges {
+func (hashRangeList hashRanges) combineRanges() hashRanges {
 	sort.Sort(hashRangesMinAscSorter(hashRangeList))
 	combinedHashRangeList := hashRangeList[:0]
 
@@ -163,7 +163,7 @@ func (hashRangeList hashRanges) combine() hashRanges {
 	return append(combinedHashRangeList, hashRangeList[len(hashRangeList)-1])
 }
 
-func (hashRangeList hashRanges) keyRanges(sub subspace.Subspace) []fdb.KeyRange {
+func (hashRangeList hashRanges) createKeyRanges(sub subspace.Subspace) []fdb.KeyRange {
 	keyRangeList := make([]fdb.KeyRange, 0, len(hashRangeList))
 
 	for _, hashRange := range hashRangeList {
