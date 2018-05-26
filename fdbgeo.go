@@ -9,19 +9,21 @@ import (
 	"github.com/mmcloughlin/geohash"
 )
 
-// RadialRange returns a slice of one or more ranges of keys that are used
-// to efficiently perform spatial queries using a radius, latitude, and longitude.
+// RadialRange uses a radius in kilometers, a latitude, and a longitude to return
+// a slice of one or more ranges of keys that can be used to efficiently perform
+// geohash-based spatial queries.
 //
-// RadialRange uses an algorithm that was derived from the "Search" section of this page:
+// This method uses an algorithm that was derived from the "Search" section of this page:
 // https://web.archive.org/web/20180526044934/https://github.com/yinqiwen/ardb/wiki/Spatial-Index#search
 //
-// RadialRange expands upon the ideas referenced above by:
+// RadialRange expands upon the ideas referenced above, by:
 //
 // • Sorting key ranges
 //
 // • Combining overlapping key ranges
 //
 // • Handling overflows resulting from bitshifting, such as when querying for: (-90, -180)
+//
 func RadialRange(params RadialRangeParams) []fdb.KeyRange {
 	return params.
 		setDefaults().
@@ -30,8 +32,8 @@ func RadialRange(params RadialRangeParams) []fdb.KeyRange {
 		keyRanges(params.Subspace)
 }
 
-// RadialRangeParams defaults to expecting that 64-bit geohash keys are used.
-// A subspace is prepended if one is set.
+// RadialRangeParams defaults to expecting 64-bit geohash-encoded keys.
+// A subspace will be prepended if one is set.
 type RadialRangeParams struct {
 	BitsOfPrecision uint
 	Radius,

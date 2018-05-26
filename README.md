@@ -7,7 +7,7 @@
 go get -u github.com/umpc/go-fdbgeo
 ```
 
-This package implements an efficient algorithm for performing spatial range queries using FoundationDB with geohash keys and a search radius.
+This package implements an efficient algorithm for performing spatial range queries using FoundationDB with geohash-encoded keys and a search radius.
 
 The `RadialRange` method appears to be sufficient for range queries of around 5,000km or less. Changes that efficiently add support for larger query ranges are welcome.
 
@@ -18,6 +18,13 @@ This package may later be expanded to include other relevant tools for using Fou
 ## Example usage
 
 ```go
+import (
+  ...
+  "github.com/umpc/go-fdbgeo"
+)
+
+...
+
 keyRanges := fdbgeo.RadialRange(fdbgeo.RadialRangeParams{
   Subspace:  dir,
   Radius:    32.18688,
