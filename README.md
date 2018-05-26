@@ -13,7 +13,7 @@ The `RadialRange` method appears to be sufficient for range queries of around 5,
 
 This package may later be expanded to include other relevant tools for using FoundationDB as a spatial index with [EPSG:4326](https://epsg.io/4326) coordinates.
 
-**Note:** As of 5/26/2018, changes from [`apple/foundationdb` PR #408](https://github.com/apple/foundationdb/pull/408) must be applied to use this package with `uint64` geohash keys, represented by `-1 << 63` through `1<<63 - 1`.
+**Note:** As of 5/26/2018, changes from [`apple/foundationdb` PR #408](https://github.com/apple/foundationdb/pull/408) must be applied to use this package, or a runtime panic will occur during subspace encoding.
 
 ## Example usage
 
