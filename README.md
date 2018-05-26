@@ -18,7 +18,7 @@ This package may later be expanded to include other relevant tools for using Fou
 ## Example usage
 
 ```go
-geoKeyRanges := fdbgeo.RadialRange(fdbgeo.RadialRangeParams{
+keyRanges := fdbgeo.RadialRange(fdbgeo.RadialRangeParams{
   Subspace:  dir,
   Radius:    32.18688,
   Latitude:  37.334722,
