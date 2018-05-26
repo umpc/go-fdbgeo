@@ -18,11 +18,6 @@ This package may later be expanded to include other relevant tools for using Fou
 ## Example usage
 
 ```go
-import (
-  ...
-  "github.com/umpc/go-fdbgeo"
-)
-
 ...
 
 keyRanges := fdbgeo.RadialRange(fdbgeo.RadialRangeParams{
@@ -36,7 +31,7 @@ fdbRangeOptions := fdb.RangeOptions{
   Mode: fdb.StreamingModeWantAll,
 }
 
-ret, err := store.ReadTransact(func(tr fdb.ReadTransaction) (ret interface{}, e error) {
+ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (ret interface{}, e error) {
   rangeResults := make([]fdb.RangeResult, len(keyRanges))
 
   for i, keyRange := range keyRanges {
