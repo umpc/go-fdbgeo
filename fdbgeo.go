@@ -16,8 +16,11 @@ import (
 // https://web.archive.org/web/20180526044934/https://github.com/yinqiwen/ardb/wiki/Spatial-Index#search
 //
 // RadialRange expands upon the ideas referenced above by:
+//
 // • Sorting key ranges
+//
 // • Combining overlapping key ranges
+//
 // • Handling overflows resulting from bitshifting, such as when querying for: (-90, -180)
 func RadialRange(params RadialRangeParams) []fdb.KeyRange {
 	return params.
