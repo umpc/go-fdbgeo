@@ -7,11 +7,11 @@
 go get -u github.com/umpc/go-fdbgeo
 ```
 
-This package implements an efficient algorithm for performing spatial range queries using FoundationDB with geohash-encoded keys and a search radius.
+This package contains tools for building geospatial layers using FoundationDB with geohash-encoded keys.
 
-The `RadialRange` method appears to be sufficient for range queries of around 5,000km or less. Changes that efficiently add support for larger query ranges are welcome.
+This package uses its complimentary [`zrange`](https://github.com/umpc/go-zrange) package, for performing spatial range queries using FoundationDB with geohash-encoded keys and a search radius.
 
-This package may later be expanded to include other relevant tools for using FoundationDB as a spatial index with [EPSG:4326](https://epsg.io/4326) coordinates.
+The `RadialRange` method appears to be sufficient for range queries of around 5,000km or less. Changes that efficiently add support for larger query ranges are welcome [here](https://github.com/umpc/go-zrange).
 
 **Note:** As of 5/26/2018, changes from [`apple/foundationdb` PR #408](https://github.com/apple/foundationdb/pull/408) must be applied to use this package, or a runtime panic will occur during subspace encoding.
 
