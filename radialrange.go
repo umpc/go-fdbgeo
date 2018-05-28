@@ -22,9 +22,8 @@ import (
 // • Handling overflows resulting from bitshifting, such as when querying for: (-90, -180)
 //
 func RadialRange(params RadialRangeParams) []fdb.KeyRange {
-	zrangeParams := params.
-		setDefaults().
-		zrange()
+	params = params.setDefaults()
+	zrangeParams := params.zrange()
 
 	hashRangeList := zrange.RadialRange(zrangeParams)
 	return createKeyRanges(params.Subspace, hashRangeList)
@@ -45,11 +44,7 @@ type RadialRangeParams struct {
 // make parsing more efficient. Its potential benefits are dependent on the data
 // model in use.
 func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
-	zrangeParams := params.
-		zrange().
-		SetDefaults()
-
-	return zrangeParams.WithinRadius(geohashID)
+	return params.zrange().WithinRadius(geohashID)
 }
 
 func (params RadialRangeParams) setDefaults() RadialRangeParams {
