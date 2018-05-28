@@ -21,11 +21,10 @@ import (
 //
 // • Handling overflows resulting from bitshifting, such as when querying for: (-90, -180)
 //
-func RadialRange(params RadialRangeParams) []fdb.KeyRange {
+func (params RadialRangeParams) RadialRange() []fdb.KeyRange {
 	params = params.setDefaults()
-	zrangeParams := params.zrange()
 
-	hashRangeList := zrange.RadialRange(zrangeParams)
+	hashRangeList := params.zrange().RadialRange()
 	return createKeyRanges(params.Subspace, hashRangeList)
 }
 

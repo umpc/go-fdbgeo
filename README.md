@@ -27,7 +27,7 @@ rangeParams := fdbgeo.RadialRangeParams{
   Longitude: -122.008889,
 }
 
-keyRanges := fdbgeo.RadialRange(rangeParams)
+keyRanges := rangeParams.RadialRange()
 
 fdbRangeOptions := fdb.RangeOptions{
   Mode: fdb.StreamingModeWantAll,
