@@ -3,6 +3,7 @@ package fdbgeo
 import (
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
+	"github.com/mmcloughlin/geohash"
 	"github.com/umpc/go-zrange"
 )
 
@@ -49,4 +50,17 @@ func (params RadialRangeParams) setDefaults() RadialRangeParams {
 		params.Subspace = subspace.FromBytes(nil)
 	}
 	return params
+}
+
+// WithinRadius determines if a Geohash is within the specified radius.
+func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
+	latitude, longitude := geohash.DecodeIntWithPrecision(
+		geohashID,
+		params.BitsOfPrecision,
+	)
+	distanceKm := zrange.Haversine(
+		params.Latitude, params.Longitude,
+		latitude, longitude,
+	)
+	return distanceKm < params.Radius
 }
