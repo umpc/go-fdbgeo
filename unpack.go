@@ -19,21 +19,20 @@ func UnpackUint(key fdb.Key, idx int) (uint64, error) {
 		idx += len(k)
 	}
 
-	const errFmt = "idx is %s index of the parsed key"
+	const idxValErrFmt = "idx %d is %s index of the parsed key"
 	if idx < 0 {
-		return 0, fmt.Errorf(errFmt, "less than the first")
+		return 0, fmt.Errorf(idxValErrFmt, idx, "less than the first")
 	}
 	if idx > len(k)-1 {
-		return 0, fmt.Errorf(errFmt, "greater than the final")
+		return 0, fmt.Errorf(idxValErrFmt, idx, "greater than the final")
 	}
 
-	var ret uint64
 	switch v := k[idx].(type) {
 	case int64:
-		ret = uint64(v)
+		return uint64(v), nil
 	case uint64:
-		ret = v
+		return v, nil
+	default:
+		return 0, fmt.Errorf("value at idx %d of the parsed key is not a valid integer type", idx)
 	}
-
-	return ret, nil
 }
