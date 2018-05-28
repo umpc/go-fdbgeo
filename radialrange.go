@@ -3,7 +3,6 @@ package fdbgeo
 import (
 	"github.com/apple/foundationdb/bindings/go/src/fdb"
 	"github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
-	"github.com/mmcloughlin/geohash"
 	"github.com/umpc/go-zrange"
 )
 
@@ -23,14 +22,8 @@ import (
 // • Handling overflows resulting from bitshifting, such as when querying for: (-90, -180)
 //
 func RadialRange(params RadialRangeParams) []fdb.KeyRange {
-	params = params.setDefaults()
-
-	hashRangeList := zrange.RadialRange(zrange.RadialRangeParams{
-		BitsOfPrecision: params.BitsOfPrecision,
-		Radius:          params.Radius,
-		Latitude:        params.Latitude,
-		Longitude:       params.Longitude,
-	})
+	zrangeParams := params.setDefaults().zrange()
+	hashRangeList := zrange.RadialRange(zrangeParams)
 
 	return createKeyRanges(params.Subspace, hashRangeList)
 }
@@ -45,31 +38,30 @@ type RadialRangeParams struct {
 	Subspace subspace.Subspace
 }
 
+// WithinRadius determines if a Geohash is within the specified radius.
+// Running WithinRadius in a RangeIterator loop may double transaction time though
+// make parsing more efficient. Its potential benefits are dependent on the data
+// model in use.
+func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
+	zrangeParams := params.
+		zrange().
+		SetDefaults()
+
+	return zrangeParams.WithinRadius(geohashID)
+}
+
 func (params RadialRangeParams) setDefaults() RadialRangeParams {
-	if params.BitsOfPrecision == 0 {
-		params.BitsOfPrecision = 64
-	}
 	if params.Subspace == nil {
 		params.Subspace = subspace.FromBytes(nil)
 	}
 	return params
 }
 
-// WithinRadius determines if a Geohash is within the specified radius.
-// Running WithinRadius in a RangeIterator loop may double transaction time though
-// make parsing more efficient. Its potential benefits are dependent on the data
-// model in use.
-func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
-	params = params.setDefaults()
-
-	latitude, longitude := geohash.DecodeIntWithPrecision(
-		geohashID,
-		params.BitsOfPrecision,
-	)
-	distanceKm := zrange.Haversine(
-		params.Latitude, params.Longitude,
-		latitude, longitude,
-	)
-
-	return distanceKm < params.Radius
+func (params RadialRangeParams) zrange() zrange.RadialRangeParams {
+	return zrange.RadialRangeParams{
+		BitsOfPrecision: params.BitsOfPrecision,
+		Radius:          params.Radius,
+		Latitude:        params.Latitude,
+		Longitude:       params.Longitude,
+	}
 }
