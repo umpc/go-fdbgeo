@@ -38,7 +38,7 @@ type RadialRangeParams struct {
 	Subspace subspace.Subspace
 }
 
-// WithinRadius determines if a Geohash is within the specified radius.
+// WithinRadius determines whether a Geohash is within the specified radius.
 // Running WithinRadius in a RangeIterator loop may double transaction time though
 // make parsing more efficient. Its potential benefits are dependent on the data
 // model in use.
