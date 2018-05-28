@@ -53,7 +53,7 @@ ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (ret interface{}, e err
       }
 
       // Running WithinRadius before value parsing may benefit performance,
-      // though it depends on your data model.
+      // though it depends on the data model in use.
       if !rangeParams.WithinRadius(geohashID) {
         continue
       }
