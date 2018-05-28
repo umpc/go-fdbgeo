@@ -20,12 +20,14 @@ The `RadialRange` method appears to be sufficient for range queries of around 5,
 ```go
 ...
 
-keyRanges := fdbgeo.RadialRange(fdbgeo.RadialRangeParams{
+rangeParams := fdbgeo.RadialRangeParams{
   Subspace:  dir,
   Radius:    32.18688,
   Latitude:  37.334722,
   Longitude: -122.008889,
-})
+}
+
+keyRanges := fdbgeo.RadialRange(rangeParams)
 
 fdbRangeOptions := fdb.RangeOptions{
   Mode: fdb.StreamingModeWantAll,
@@ -43,7 +45,30 @@ ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (ret interface{}, e err
     ri := rangeResult.Iterator()
 
     for ri.Advance() {
-      kvList = append(kvList, ri.MustGet())
+      kv := ri.MustGet()
+
+      // The following steps are only necessary when using WithinRadius before
+      // value parsing.
+      k, err := tuple.Unpack(kv.Key)
+      if err != nil {
+        panic(err)
+      }
+
+      var geohashID uint64
+      switch hash := k[len(k)-2].(type) {
+      case int64:
+        geohashID = uint64(hash)
+      case uint64:
+        geohashID = hash
+      }
+
+      // Running this before value parsing may benefit performance, though it depends
+      // on your data model.
+      if !rangeParams.WithinRadius(geohashID) {
+        continue
+      }
+
+      kvList = append(kvList, kv)
     }
   }
 
