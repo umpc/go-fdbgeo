@@ -47,23 +47,13 @@ ret, err := db.ReadTransact(func(tr fdb.ReadTransaction) (ret interface{}, e err
     for ri.Advance() {
       kv := ri.MustGet()
 
-      // The following steps are only necessary when using WithinRadius before
-      // value parsing.
-      k, err := tuple.Unpack(kv.Key)
+      geohashID, err := fdbgeo.UnpackUint(kv.Key, -2)
       if err != nil {
         panic(err)
       }
 
-      var geohashID uint64
-      switch hash := k[len(k)-2].(type) {
-      case int64:
-        geohashID = uint64(hash)
-      case uint64:
-        geohashID = hash
-      }
-
-      // Running this before value parsing may benefit performance, though it depends
-      // on your data model.
+      // Running WithinRadius before value parsing may benefit performance,
+      // though it depends on your data model.
       if !rangeParams.WithinRadius(geohashID) {
         continue
       }
