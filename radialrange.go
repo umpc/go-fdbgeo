@@ -46,6 +46,9 @@ type RadialRangeParams struct {
 }
 
 func (params RadialRangeParams) setDefaults() RadialRangeParams {
+	if params.BitsOfPrecision == 0 {
+		params.BitsOfPrecision = 64
+	}
 	if params.Subspace == nil {
 		params.Subspace = subspace.FromBytes(nil)
 	}
@@ -54,6 +57,8 @@ func (params RadialRangeParams) setDefaults() RadialRangeParams {
 
 // WithinRadius determines if a Geohash is within the specified radius.
 func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
+	params = params.setDefaults()
+
 	latitude, longitude := geohash.DecodeIntWithPrecision(
 		geohashID,
 		params.BitsOfPrecision,
@@ -62,5 +67,6 @@ func (params RadialRangeParams) WithinRadius(geohashID uint64) bool {
 		params.Latitude, params.Longitude,
 		latitude, longitude,
 	)
+
 	return distanceKm < params.Radius
 }
